@@ -1,0 +1,16 @@
+node_modules/
+.next/
+out/
+*.log
+.env
+.env.*
+!.env.example
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.db
+.DS_Store
