@@ -10,4 +10,6 @@
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--paper); color: var(--ink); }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: Georgia, "Times New Roman", serif; }
+button, input { font: inherit; }
+.eyebrow { color: var(--accent); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; }
