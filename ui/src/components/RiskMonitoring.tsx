@@ -6,7 +6,7 @@ const risks = [
 
 export function RiskMonitoring() {
   return (
-    <section aria-labelledby="risk-title" className="border-t border-[var(--line)] pt-8">
+    <section aria-labelledby="risk-title" id="risk-monitoring" className="border-t border-[var(--line)] pt-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="eyebrow">Signal room</p>

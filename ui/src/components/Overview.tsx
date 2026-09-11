@@ -98,7 +98,7 @@ export default function Overview() {
   const maxStage = useMemo(() => Math.max(...STAGES.map((s) => s.value)), []);
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <section id="overview" className="px-4 py-6 sm:px-6 lg:px-8">
       {/* Summary cards */}
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {SUMMARY_CARDS.map(({ label, value, icon: Icon, tone }) => {
@@ -256,6 +256,6 @@ export default function Overview() {
           ))}
         </div>
       </section>
-    </main>
+    </section>
   );
 }
