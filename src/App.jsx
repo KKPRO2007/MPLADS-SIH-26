@@ -4,6 +4,9 @@ import HomePage from "./pages/HomePage.jsx";
 import OverviewPage from "./pages/OverviewPage.jsx";
 import RiskMonitoringPage from "./pages/RiskMonitoringPage.jsx";
 import CitizenCornerPage from "./pages/CitizenCornerPage.jsx";
+import StateExplorerPage from "./pages/StateExplorerPage.jsx";
+import SectorAnalyticsPage from "./pages/SectorAnalyticsPage.jsx";
+import FundFlowPage from "./pages/FundFlowPage.jsx";
 
 export default function App() {
   const [page, setPage] = useState("home");
@@ -73,6 +76,9 @@ export default function App() {
             {page === "alerts" && <RiskMonitoringPage defaultTab="alerts" data={backendData} error={backendError} />}
             {page === "mps" && <RiskMonitoringPage defaultTab="mps" data={backendData} error={backendError} />}
             {page === "works" && <RiskMonitoringPage defaultTab="works" data={backendData} error={backendError} />}
+            {page === "states" && <StateExplorerPage />}
+            {page === "sectors" && <SectorAnalyticsPage />}
+            {page === "funds" && <FundFlowPage />}
             {page === "citizen" && <CitizenCornerPage />}
           </main>
         )}

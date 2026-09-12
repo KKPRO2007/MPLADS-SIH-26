@@ -64,7 +64,7 @@ export default function RiskMonitoringPage({ defaultTab = "works", data, error }
         a.state.toLowerCase().includes(alertQuery.toLowerCase());
       return matchesRisk && matchesQuery;
     });
-  }, [alertRiskFilter, alertQuery]);
+  }, [alerts, alertRiskFilter, alertQuery]);
 
   // Memoized Filtered MPs
   const statesList = useMemo(() => ["All", ...new Set(mpDirectory.map((m) => m.state))], []);
@@ -82,7 +82,7 @@ export default function RiskMonitoringPage({ defaultTab = "works", data, error }
         m.state.toLowerCase().includes(mpQuery.toLowerCase());
       return matchHouse && matchState && matchParty && matchQuery;
     });
-  }, [houseFilter, mpStateFilter, partyFilter, mpQuery]);
+  }, [mpDirectory, houseFilter, mpStateFilter, partyFilter, mpQuery]);
 
   // Memoized Filtered Works
   const totalAssets = useMemo(() => statusStages.reduce((s, x) => s + x.value, 0), [statusStages]);
@@ -99,7 +99,7 @@ export default function RiskMonitoringPage({ defaultTab = "works", data, error }
         w.district.toLowerCase().includes(workQuery.toLowerCase());
       return matchStatus && matchSector && matchQuery;
     });
-  }, [workStatusFilter, workSectorFilter, workQuery]);
+  }, [worksList, workStatusFilter, workSectorFilter, workQuery]);
 
   return (
     <div className="flex flex-col gap-5">

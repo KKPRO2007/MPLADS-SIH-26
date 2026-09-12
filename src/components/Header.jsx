@@ -116,6 +116,22 @@ export default function Header({ page, setPage, fontSize, setFontSize }) {
 
           <button
             type="button"
+            onClick={() => handleNav("states")}
+            className={page === "states" ? "nav-link active" : "nav-link"}
+          >
+            State Explorer
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleNav("funds")}
+            className={page === "funds" ? "nav-link active" : "nav-link"}
+          >
+            Fund Flow
+          </button>
+
+          <button
+            type="button"
             onClick={() => handleNav("citizen")}
             className={page === "citizen" ? "nav-link active" : "nav-link"}
           >
