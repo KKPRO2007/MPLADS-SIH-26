@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 
 from app.auth import create_access_token, hash_password, verify_password
 from app.core.config import get_settings
+from app.data_service import model_status, risks, summary
 
 settings = get_settings()
 app = FastAPI(title=settings.app_name, version="0.1.0")
@@ -26,6 +27,28 @@ class LoginRequest(BaseModel):
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok", "environment": settings.environment}
+
+
+@app.get("/api/summary")
+def get_summary(state: str | None = None, risk: str | None = None) -> dict[str, int]:
+    return summary(state=state, risk=risk)
+
+
+@app.get("/api/states")
+def get_states() -> list[dict]:
+    from app.data_service import _state_rows
+
+    return _state_rows()
+
+
+@app.get("/api/risks")
+def get_risks(limit: int = 12, state: str | None = None, risk: str | None = None) -> list[dict]:
+    return risks(max(1, min(limit, 600)), state=state, risk=risk)
+
+
+@app.get("/api/ml/status")
+def get_model_status() -> dict:
+    return model_status()
 
 
 @app.post("/auth/login")

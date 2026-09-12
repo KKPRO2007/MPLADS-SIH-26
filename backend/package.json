@@ -1,0 +1,22 @@
+{
+  "name": "mplads-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "db:init": "node scripts/init-db.js",
+    "db:seed-demo": "node scripts/seed-demo-data.js",
+    "dev:ml": ".\\.venv\\Scripts\\python.exe -m uvicorn app.main:app --reload --port 8001",
+    "ml:install": ".\\.venv\\Scripts\\python.exe -m pip install -r ml\\requirements.txt",
+    "ml:train": ".\\.venv\\Scripts\\python.exe ml\\src\\train.py"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "csv-parse": "^5.6.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "pg": "^8.13.1"
+  }
+}
