@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 :root {
+<<<<<<< HEAD
   --ink: #0f172a;
   --paper: #f8fafc;
   --accent: #2563eb;
@@ -10,6 +11,14 @@
   --surface: #ffffff;
   --muted: #64748b;
   --font-sans: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+=======
+  --ink: #17211f;
+  --paper: #f5f1e8;
+  --accent: #d95d39;
+  --line: #d7d0c3;
+  --surface: #ffffff;
+  --muted: #64748b;
+>>>>>>> d76566189a93b3ae4bc75ce560f94dc7d7919eb3
 }
 
 * {
@@ -18,7 +27,10 @@
 
 html {
   scroll-behavior: smooth;
+<<<<<<< HEAD
   font-family: var(--font-sans);
+=======
+>>>>>>> d76566189a93b3ae4bc75ce560f94dc7d7919eb3
 }
 
 body {
@@ -26,16 +38,25 @@ body {
   min-height: 100vh;
   background: var(--paper);
   color: var(--ink);
+<<<<<<< HEAD
   font-family: var(--font-sans);
+=======
+  font-family: Georgia, "Times New Roman", serif;
+>>>>>>> d76566189a93b3ae4bc75ce560f94dc7d7919eb3
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 button,
 input,
+<<<<<<< HEAD
 select,
 textarea {
   font-family: var(--font-sans);
+=======
+select {
+  font: inherit;
+>>>>>>> d76566189a93b3ae4bc75ce560f94dc7d7919eb3
 }
 
 button,
@@ -53,6 +74,7 @@ button:disabled {
 }
 
 ::selection {
+<<<<<<< HEAD
   background: #dbeafe;
   color: #1e40af;
 }
@@ -60,6 +82,15 @@ button:disabled {
 :focus-visible {
   outline: 2px solid #2563eb;
   outline-offset: 2px;
+=======
+  background: color-mix(in srgb, var(--accent) 28%, white);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 55%, white);
+  outline-offset: 3px;
+>>>>>>> d76566189a93b3ae4bc75ce560f94dc7d7919eb3
 }
 
 select {
@@ -76,7 +107,11 @@ select {
   color: var(--accent);
   font-size: 0.7rem;
   font-weight: 700;
+<<<<<<< HEAD
   letter-spacing: 0.14em;
+=======
+  letter-spacing: 0.18em;
+>>>>>>> d76566189a93b3ae4bc75ce560f94dc7d7919eb3
   text-transform: uppercase;
 }
 
