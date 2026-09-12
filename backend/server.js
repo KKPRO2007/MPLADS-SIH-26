@@ -6,12 +6,28 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { parse } from "csv-parse/sync";
 import { pool, query } from "./db/database.js";
+import { authenticate, createToken, publicUser, requireAuth, requireRoles, ROLES } from "./auth.js";
 
 const app = express();
 const port = Number(process.env.PORT || 8080);
 
 app.use(cors({ origin: process.env.CORS_ORIGIN || "http://localhost:5173" }));
 app.use(express.json());
+
+app.post("/api/auth/login", async (request, response, next) => {
+  try {
+    const { email, password } = request.body || {};
+    if (!email || !password) return response.status(400).json({ error: "Email and password are required." });
+    const user = await authenticate(email, password);
+    if (!user) return response.status(401).json({ error: "Invalid email or password." });
+    return response.json({ access_token: createToken(user), token_type: "bearer", user: publicUser(user) });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+app.get("/api/auth/me", requireAuth, (request, response) => response.json({ user: request.user }));
+app.get("/api/auth/roles", requireAuth, requireRoles(ROLES.ADMIN), (_request, response) => response.json({ roles: Object.values(ROLES) }));
 
 const backendRoot = dirname(fileURLToPath(import.meta.url));
 const fallbackPath = join(backendRoot, "ml", "data", "processed", "MPLADS_master_dataset_26102_cleaned.csv");
@@ -60,7 +76,21 @@ const fallbackUiData = async () => {
   const colors = { Completed: "#138808", Ongoing: "#0B4C8C", Delayed: "#E07B1A", Stalled: "#B23A32" };
   const sanctioned = rows.reduce((total, row) => total + number(row.sanctioned_amount_inr), 0);
   const utilized = rows.reduce((total, row) => total + number(row.expenditure_amount_inr), 0);
-  return { generatedAt: new Date().toISOString(), source: { label: "Bundled processed ML dataset", verified: false }, nationalOverview: { totalMps: mps.length, sanctioned: Math.round(sanctioned / 100000) / 100, utilized: Math.round(utilized / 100000) / 100, utilizationPct: sanctioned ? Math.round(utilized / sanctioned * 1000) / 10 : 0, totalWorksSanctioned: works.length, totalWorksCompleted: works.filter((work) => work.status === "Completed").length, openRiskAlerts: alerts.length }, works: works.slice(0, 600), alerts, mps: mps.slice(0, 600), statusStages: [...statusCounts].map(([name, value]) => ({ name, value, color: colors[name] })), worksNeedingAttention: works.filter((work) => number(rowsById.get(work.id)?.delay_days) > 0).sort((a, b) => number(rowsById.get(b.id)?.delay_days) - number(rowsById.get(a.id)?.delay_days)).slice(0, 8).map((work) => ({ name: work.name, state: work.state, days: number(rowsById.get(work.id)?.delay_days), reason: `${work.flagType}; physical progress ${work.progressPct}%` })), trendData: [], model: { datasetRows: rows.length, scoring: "Processed ML dataset fallback" } };
+  const trendByMonth = new Map();
+  rows.forEach((row) => {
+    const month = String(row.recommendation_start_date || "").slice(0, 7);
+    if (!/^\d{4}-\d{2}$/.test(month)) return;
+    const current = trendByMonth.get(month) || { sanctioned: 0, utilized: 0 };
+    current.sanctioned += number(row.sanctioned_amount_inr);
+    current.utilized += number(row.expenditure_amount_inr);
+    trendByMonth.set(month, current);
+  });
+  const trendData = [...trendByMonth.entries()].sort(([left], [right]) => left.localeCompare(right)).slice(-12).map(([month, values]) => ({
+    month: new Date(`${month}-01T00:00:00Z`).toLocaleDateString("en-IN", { month: "short", year: "2-digit", timeZone: "UTC" }),
+    sanctioned: Math.round(values.sanctioned / 10000000 * 100) / 100,
+    utilized: Math.round(values.utilized / 10000000 * 100) / 100,
+  }));
+  return { generatedAt: new Date().toISOString(), source: { label: "Bundled processed ML dataset", verified: false }, nationalOverview: { totalMps: mps.length, sanctioned: Math.round(sanctioned / 100000) / 100, utilized: Math.round(utilized / 100000) / 100, utilizationPct: sanctioned ? Math.round(utilized / sanctioned * 1000) / 10 : 0, totalWorksSanctioned: works.length, totalWorksCompleted: works.filter((work) => work.status === "Completed").length, openRiskAlerts: alerts.length }, works: works.slice(0, 600), alerts, mps: mps.slice(0, 600), statusStages: [...statusCounts].map(([name, value]) => ({ name, value, color: colors[name] })), worksNeedingAttention: works.filter((work) => number(rowsById.get(work.id)?.delay_days) > 0).sort((a, b) => number(rowsById.get(b.id)?.delay_days) - number(rowsById.get(a.id)?.delay_days)).slice(0, 8).map((work) => ({ name: work.name, state: work.state, days: number(rowsById.get(work.id)?.delay_days), reason: `${work.flagType}; physical progress ${work.progressPct}%` })), trendData, model: { datasetRows: rows.length, scoring: "Processed ML dataset fallback" } };
 };
 
 app.get("/health", async (_request, response, next) => {
@@ -73,7 +103,7 @@ app.get("/health", async (_request, response, next) => {
   }
 });
 
-app.get("/api/dashboard", async (_request, response, next) => {
+app.get("/api/dashboard", requireAuth, async (_request, response, next) => {
   try {
     const [totalsResult, statesResult] = await Promise.all([
       query(`SELECT
@@ -133,7 +163,7 @@ END`;
 
 const riskLevel = `CASE WHEN risk_score >= 80 THEN 'High' WHEN risk_score >= 60 THEN 'Medium' ELSE 'Low' END`;
 
-app.get("/api/ui-data", async (_request, response, next) => {
+app.get("/api/ui-data", requireAuth, async (_request, response, next) => {
   try {
     const [summaryResult, worksResult, alertsResult, mpsResult, statusResult, delayedResult, trendResult, modelResult] = await Promise.all([
       query(`SELECT COUNT(*)::int AS total_works,
@@ -203,7 +233,7 @@ app.get("/api/ui-data", async (_request, response, next) => {
   }
 });
 
-app.get("/api/ml/status", async (_request, response, next) => {
+app.get("/api/ml/status", requireAuth, async (_request, response, next) => {
   try {
     const { rows } = await query(`SELECT COUNT(*)::int AS rows, COUNT(*) FILTER (WHERE risk_score >= 60)::int AS flagged,
       MAX(imported_at) AS last_imported_at FROM works`);

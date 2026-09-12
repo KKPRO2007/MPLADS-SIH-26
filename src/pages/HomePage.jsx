@@ -33,7 +33,7 @@ function formatNumber(value) {
   return new Intl.NumberFormat("en-IN").format(value);
 }
 
-export default function HomePage({ onNavigate }) {
+export default function HomePage({ onNavigate, token }) {
   const [dashboard, setDashboard] = useState(null);
   const [loadError, setLoadError] = useState("");
 
@@ -43,18 +43,18 @@ export default function HomePage({ onNavigate }) {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
 
     const controller = new AbortController();
-    fetch("/api/dashboard", { signal: controller.signal })
+    fetch("/api/dashboard", { signal: controller.signal, headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((response) => {
         if (!response.ok) throw new Error("Dashboard API is unavailable");
         return response.json();
       })
       .then((data) => setDashboard(data))
       .catch((error) => {
-        if (error.name !== "AbortError") setLoadError("Waiting for the PostgreSQL data service.");
+        if (error.name !== "AbortError") setLoadError("Sign in to load the monitoring data.");
       });
 
     return () => controller.abort();
-  }, []);
+  }, [token]);
 
   const updatedAt = useMemo(
     () => dashboard?.generatedAt

@@ -7,6 +7,8 @@ import CitizenCornerPage from "./pages/CitizenCornerPage.jsx";
 import StateExplorerPage from "./pages/StateExplorerPage.jsx";
 import SectorAnalyticsPage from "./pages/SectorAnalyticsPage.jsx";
 import FundFlowPage from "./pages/FundFlowPage.jsx";
+import LoginPage from "./pages/LoginPage.jsx";
+import RoleWorkspacePage from "./pages/RoleWorkspacePage.jsx";
 
 export default function App() {
   const [page, setPage] = useState("home");
@@ -15,11 +17,44 @@ export default function App() {
   const [fontSize, setFontSize] = useState("normal"); // 'normal', 'large', 'xlarge'
   const [backendData, setBackendData] = useState(null);
   const [backendError, setBackendError] = useState("");
+  const [user, setUser] = useState(() => {
+    try {
+      const token = localStorage.getItem("mplads_token");
+      return token ? JSON.parse(localStorage.getItem("mplads_user")) || null : null;
+    } catch {
+      return null;
+    }
+  });
+  const [showLogin, setShowLogin] = useState(() => !localStorage.getItem("mplads_token"));
+
+  const handleLogin = ({ access_token: token, user: signedInUser }) => {
+    localStorage.setItem("mplads_token", token);
+    localStorage.setItem("mplads_user", JSON.stringify(signedInUser));
+    setUser(signedInUser);
+    setShowLogin(false);
+    setPage("workspace");
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("mplads_token");
+    localStorage.removeItem("mplads_user");
+    setUser(null);
+    setPage("home");
+  };
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch("/api/ui-data", { signal: controller.signal })
+    const token = localStorage.getItem("mplads_token");
+    if (!token) {
+      setBackendData(null);
+      return () => controller.abort();
+    }
+    fetch("/api/ui-data", { signal: controller.signal, headers: { Authorization: `Bearer ${token}` } })
       .then((response) => {
+        if (response.status === 401) {
+          handleLogout();
+          setShowLogin(true);
+        }
         if (!response.ok) throw new Error("Backend unavailable");
         return response.json();
       })
@@ -28,7 +63,7 @@ export default function App() {
         if (error.name !== "AbortError") setBackendError("Live backend data is unavailable.");
       });
     return () => controller.abort();
-  }, []);
+  }, [user]);
 
   // Accessibility CSS classes
   const fontClass =
@@ -57,13 +92,19 @@ export default function App() {
         setContrastMode={setContrastMode}
         fontSize={fontSize}
         setFontSize={setFontSize}
+        user={user}
+        onLogin={() => setShowLogin(true)}
+        onLogout={handleLogout}
       />
 
       <div className="flex-1 min-w-0 flex flex-col">
-        {page === "home" ? (
-          <HomePage onNavigate={setPage} />
+        {showLogin ? (
+          <LoginPage onLogin={handleLogin} onCancel={() => setShowLogin(false)} />
+        ) : page === "home" ? (
+          <HomePage onNavigate={setPage} token={localStorage.getItem("mplads_token")} />
         ) : (
           <main id="main-content" className="flex-1 overflow-y-auto p-4 sm:p-6 max-w-[1500px] w-full mx-auto">
+            {page === "workspace" && <RoleWorkspacePage user={user} onNavigate={setPage} />}
             {page === "overview" && (
               <OverviewPage
                 goToAlerts={() => setPage("risk")}
@@ -79,7 +120,7 @@ export default function App() {
             {page === "states" && <StateExplorerPage />}
             {page === "sectors" && <SectorAnalyticsPage />}
             {page === "funds" && <FundFlowPage />}
-            {page === "citizen" && <CitizenCornerPage />}
+            {page === "citizen" && <CitizenCornerPage data={backendData} />}
           </main>
         )}
       </div>

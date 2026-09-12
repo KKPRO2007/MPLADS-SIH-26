@@ -105,7 +105,7 @@ export default function OverviewPage({ goToAlerts, goToMps, data, error }) {
         <SectionCard
           title="National Fund Flow Trajectory"
           className="lg:col-span-3"
-          action={<span className="text-[12px] text-muted">₹ Crore (Apr–Sep 2026)</span>}
+          action={<span className="text-[12px] text-muted">₹ Crore (latest 12 dataset months)</span>}
         >
           <div style={{ width: "100%", height: 230 }}>
             <ResponsiveContainer>

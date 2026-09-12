@@ -12,7 +12,7 @@ export const PAGE_TITLES = {
   citizen: "Citizen Corner & Reports",
 };
 
-export default function Header({ page, setPage, fontSize, setFontSize }) {
+export default function Header({ page, setPage, fontSize, setFontSize, user, onLogin, onLogout }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleNav = (key) => {
@@ -116,22 +116,6 @@ export default function Header({ page, setPage, fontSize, setFontSize }) {
 
           <button
             type="button"
-            onClick={() => handleNav("states")}
-            className={page === "states" ? "nav-link active" : "nav-link"}
-          >
-            State Explorer
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleNav("funds")}
-            className={page === "funds" ? "nav-link active" : "nav-link"}
-          >
-            Fund Flow
-          </button>
-
-          <button
-            type="button"
             onClick={() => handleNav("citizen")}
             className={page === "citizen" ? "nav-link active" : "nav-link"}
           >
@@ -141,14 +125,16 @@ export default function Header({ page, setPage, fontSize, setFontSize }) {
 
         {/* User Login Action Button - Right Aligned */}
         <div className="flex items-center gap-3 ml-auto shrink-0">
-          <button
-            className="login-button"
-            type="button"
-            onClick={() => handleNav("overview")}
-          >
-            <LockKeyhole size={18} />
-            Login
-          </button>
+          {user ? (
+            <button className="login-button" type="button" onClick={onLogout} title="Sign out">
+              <LockKeyhole size={18} />
+              {user.roleLabel || user.role} · Sign out
+            </button>
+          ) : (
+            <button className="login-button" type="button" onClick={onLogin}>
+              <LockKeyhole size={18} /> Login
+            </button>
+          )}
 
           {/* Mobile Menu Toggle Button */}
           <button
