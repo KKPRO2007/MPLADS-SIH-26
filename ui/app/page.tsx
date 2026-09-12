@@ -1,5 +1,17 @@
 "use client";
 
+<<<<<<< HEAD
+import Header from "@/src/components/Header";
+import Overview from "@/src/components/Overview";
+
+export default function HomePage() {
+  return (
+    <div className="min-h-screen">
+      <Header />
+      <main className="w-full px-4 py-6 sm:px-6 md:py-10 lg:px-8">
+        <Overview />
+      </main>
+=======
 import { useState } from "react";
 
 import Header from "@/src/components/Header";
@@ -47,6 +59,7 @@ export default function HomePage() {
           </div>
         </div>
       )}
+>>>>>>> d76566189a93b3ae4bc75ce560f94dc7d7919eb3
     </div>
   );
 }

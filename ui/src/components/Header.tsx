@@ -15,6 +15,16 @@ import {
  * Header
  * ------
  * Sticky, translucent (70% white, blurred) top bar.
+<<<<<<< HEAD
+ */
+
+const NAV_LINKS = [
+  { label: "Overview", href: "/" },
+  { label: "Risk Monitoring", href: "/risk-monitoring" },
+];
+
+export default function Header() {
+=======
  *
  * Replace `isLoggedIn` with real auth state (e.g. from a session hook / context).
  * Replace `lsTotal` / `rsTotal` with live figures from your API
@@ -45,6 +55,7 @@ type HeaderProps = {
 };
 
 export default function Header({ onProjectCheck }: HeaderProps) {
+>>>>>>> d76566189a93b3ae4bc75ce560f94dc7d7919eb3
   const [mobileOpen, setMobileOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -65,6 +76,17 @@ export default function Header({ onProjectCheck }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/70 backdrop-blur-md supports-[backdrop-filter]:bg-white/70">
+<<<<<<< HEAD
+      <div className="flex h-16 w-full items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        {/* Logo + Ministry identity */}
+        <Link href="/" className="flex min-w-0 items-center gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo.png"
+            alt="MPLADS AI-Powered Monitoring - Government of India"
+            className="h-12 w-auto object-contain py-0.5"
+          />
+=======
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         {/* Logo + Ministry identity (no project name) */}
           <Link href="#overview" className="flex min-w-0 items-center gap-3">
@@ -87,6 +109,7 @@ export default function Header({ onProjectCheck }: HeaderProps) {
               Members of Parliament Local Area Development Scheme
             </span>
           </span>
+>>>>>>> d76566189a93b3ae4bc75ce560f94dc7d7919eb3
         </Link>
 
         {/* Desktop nav */}
@@ -102,6 +125,10 @@ export default function Header({ onProjectCheck }: HeaderProps) {
           ))}
         </nav>
 
+<<<<<<< HEAD
+        {/* Right cluster: auth */}
+        <div className="flex items-center gap-2 sm:gap-3">
+=======
         {/* Right cluster: house totals + auth */}
         <div className="flex items-center gap-2 sm:gap-3">
           {onProjectCheck && (
@@ -133,6 +160,7 @@ export default function Header({ onProjectCheck }: HeaderProps) {
             </div>
           </div>
 
+>>>>>>> d76566189a93b3ae4bc75ce560f94dc7d7919eb3
           {/* Auth control */}
           {!isLoggedIn ? (
             <Link
@@ -213,6 +241,8 @@ export default function Header({ onProjectCheck }: HeaderProps) {
               </Link>
             ))}
           </nav>
+<<<<<<< HEAD
+=======
 
           {onProjectCheck && (
             <button
@@ -245,8 +275,13 @@ export default function Header({ onProjectCheck }: HeaderProps) {
               </span>
             </div>
           </div>
+>>>>>>> d76566189a93b3ae4bc75ce560f94dc7d7919eb3
         </div>
       )}
     </header>
   );
 }
+<<<<<<< HEAD
+
+=======
+>>>>>>> d76566189a93b3ae4bc75ce560f94dc7d7919eb3
