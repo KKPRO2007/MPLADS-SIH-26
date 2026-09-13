@@ -195,7 +195,7 @@ const workStatus = `CASE
 END`;
 
 const riskLevel = `CASE WHEN risk_score >= 80 THEN 'High' WHEN risk_score >= 60 THEN 'Medium' ELSE 'Low' END`;
-const displayRisk = "20 + (1 - PERCENT_RANK() OVER (ORDER BY risk_score DESC, project_id)) * 76";
+const displayRisk = "20 + (1 - (ROW_NUMBER() OVER (ORDER BY risk_score DESC, project_id) - 1)::numeric / NULLIF(COUNT(*) OVER () - 1, 0)) * 76";
 
 app.get("/api/ui-data", async (_request, response, next) => {
   try {

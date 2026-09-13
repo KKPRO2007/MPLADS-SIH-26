@@ -41,7 +41,7 @@ function WorkDetailsContent({ work, onClose, user, onLogin }) {
   const mapUrl = coordinates
     ? `https://www.openstreetmap.org/export/embed.html?bbox=${coordinates.longitude - 0.01},${coordinates.latitude - 0.01},${coordinates.longitude + 0.01},${coordinates.latitude + 0.01}&layer=mapnik&marker=${coordinates.latitude},${coordinates.longitude}`
     : "";
-  const riskScore = prediction?.risk_score ?? Math.min(96, Math.max(20, Number(work.riskScore ?? 20)));
+  const riskScore = prediction?.risk_score ?? Math.min(99.999, Math.max(20, Number(work.riskScore ?? 20)));
   const riskLevel = prediction?.risk_level || work.riskLevel || (riskScore >= 70 ? "High" : riskScore >= 40 ? "Medium" : "Low");
   const shapValues = prediction?.top_features || work.shapValues || [];
   const whyRisk = prediction?.why_flagged || work.why || fallbackExplanation(work);
@@ -81,7 +81,7 @@ function WorkDetailsContent({ work, onClose, user, onLogin }) {
           <div className="bg-white border border-slate-200 p-4 sm:p-5">
             <div className="flex items-center justify-between gap-3 border-b border-slate-200 pb-3">
               <h4 className="text-sm font-bold text-[#0B3768]">Risk assessment</h4>
-              <div className="flex items-center gap-2"><strong className="text-lg text-emerald-700">{riskScore}/96</strong><span className="text-xs font-bold px-2 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200">{riskLevel}</span></div>
+              <div className="flex items-center gap-2"><strong className="text-lg text-[#B23A32]">{riskScore}/100</strong><span className="text-xs font-bold px-2 py-1 bg-[#FBE4E1] text-[#A32A20] border border-[#E8B8B2]">{riskLevel}</span></div>
             </div>
             <p className="text-sm text-slate-700 mt-3">{whyRisk}</p>
             {prediction?.predicted_anomaly_type && <div className="mt-2 text-xs font-semibold text-slate-600">Anomaly type: {prediction.predicted_anomaly_type.replaceAll("_", " ")} · {(prediction.anomaly_type_confidence * 100).toFixed(1)}% confidence</div>}

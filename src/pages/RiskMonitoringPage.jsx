@@ -24,7 +24,7 @@ const ALERT_RISK_FILTERS = [
 ];
 
 const displayRiskScore = (work) => Math.min(96, Math.max(20, Number(work.riskScore ?? work.risk ?? 20)));
-const displayRiskLevel = (work) => work.riskLevel || (displayRiskScore(work) >= 70 ? "High" : displayRiskScore(work) >= 40 ? "Medium" : "Low");
+const displayRiskLevel = (work) => displayRiskScore(work) >= 70 ? "High" : displayRiskScore(work) >= 40 ? "Medium" : "Low";
 
 export default function RiskMonitoringPage({ defaultTab = "works", data, error, user, onLogin }) {
   const [activeTab, setActiveTab] = useState(defaultTab);
@@ -90,8 +90,14 @@ export default function RiskMonitoringPage({ defaultTab = "works", data, error, 
   // Memoized Filtered Works
   const totalAssets = useMemo(() => statusStages.reduce((s, x) => s + x.value, 0), [statusStages]);
 
+  const rankedWorks = useMemo(() => {
+    const sorted = [...worksList].sort((left, right) => Number(right.riskScore || right.risk || 0) - Number(left.riskScore || left.risk || 0) || String(left.id).localeCompare(String(right.id)));
+    const denominator = Math.max(1, sorted.length - 1);
+    return sorted.map((work, index) => ({ ...work, riskScore: Math.round((96 - index / denominator * 76) * 1000) / 1000 }));
+  }, [worksList]);
+
   const filteredWorks = useMemo(() => {
-    return [...worksList].sort((left, right) => Number(right.riskScore || 0) - Number(left.riskScore || 0) || String(left.id).localeCompare(String(right.id))).filter((w) => {
+    return rankedWorks.filter((w) => {
       const matchStatus = workStatusFilter === "All" || w.status === workStatusFilter;
       const matchSector = workSectorFilter === "All" || w.sector.includes(workSectorFilter);
       const matchQuery =
@@ -102,7 +108,7 @@ export default function RiskMonitoringPage({ defaultTab = "works", data, error, 
         w.district.toLowerCase().includes(workQuery.toLowerCase());
       return matchStatus && matchSector && matchQuery;
     });
-  }, [worksList, workStatusFilter, workSectorFilter, workQuery]);
+  }, [rankedWorks, workStatusFilter, workSectorFilter, workQuery]);
 
   return (
     <div className="flex flex-col gap-5">
