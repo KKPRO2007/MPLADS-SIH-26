@@ -5,7 +5,8 @@ import { useState } from "react";
 
 export default function AlertDrawer({ alert, onClose }) {
   const [actionDone, setActionDone] = useState(null);
-  const reasons = alert.signals || [alert.details || "The persisted ML score exceeded the review threshold."];
+  const [status, setStatus] = useState(alert.status);
+  const shapValues = alert.shapValues || [];
 
   return (
     <div
@@ -29,9 +30,9 @@ export default function AlertDrawer({ alert, onClose }) {
 
           <div className="flex items-center gap-2 mb-5">
             <RiskPill score={alert.risk} />
-            <span className="text-[12px] text-subtle font-medium">AI Risk Rating</span>
+            <span className="text-[12px] text-subtle font-medium">{alert.riskLevel || (alert.risk >= 80 ? "High" : alert.risk >= 60 ? "Medium" : "Low")} risk</span>
             <span className="mx-1 text-[#D8D4C6]">&middot;</span>
-            <StatusTag status={alert.status} />
+            <StatusTag status={status} />
           </div>
 
           <div className="grid grid-cols-2 gap-3 mb-5">
@@ -53,20 +54,25 @@ export default function AlertDrawer({ alert, onClose }) {
             </div>
           </div>
 
-          <div className="mb-5 bg-[#FFF9F2] border border-[#F5E6CC] p-4 rounded">
-            <div className="text-[12px] font-bold text-accent mb-2 flex items-center gap-1.5">
-              <FileWarning size={15} /> AI Detection Rationale
+          <div className="mb-5 bg-[#F2FBF4] border border-[#CDE8D3] p-4 rounded">
+            <div className="text-[12px] font-bold text-emerald-700 mb-2 flex items-center gap-1.5">
+              <FileWarning size={15} /> Why this work was flagged
             </div>
             <p className="text-[12.5px] text-text leading-relaxed mb-2 font-medium">
-              {alert.details || "Discrepancy detected between sanctioned cost estimates and average district benchmark."}
+              {alert.why || alert.details || "The persisted ML score exceeded the review threshold."}
             </p>
-            <ul className="flex flex-col gap-1.5 mt-2">
-              {reasons.map((r, i) => (
-                <li key={i} className="text-[12px] text-subtle leading-relaxed pl-2 border-l-2 border-saffron">
-                  {r}
-                </li>
-              ))}
-            </ul>
+            {shapValues.length > 0 && <div className="mt-3 border-t border-[#CDE8D3] pt-3">
+              <div className="text-[11px] font-bold uppercase tracking-wide text-muted mb-2">SHAP-aligned feature contribution</div>
+              <div className="flex flex-col gap-2">
+                {shapValues.filter((item) => item.value > 0).map((item) => (
+                  <div key={item.feature} className="text-[11px]">
+                    <div className="flex justify-between gap-2"><span className="text-subtle">{item.feature}</span><strong className="text-ink">+{item.value}</strong></div>
+                    <div className="h-1.5 bg-[#DCEFE0] mt-1"><div className="h-full bg-emerald-600" style={{ width: `${Math.min(100, Number(item.value) * 4)}%` }} /></div>
+                    <div className="text-muted mt-0.5">{item.detail}</div>
+                  </div>
+                ))}
+              </div>
+            </div>}
           </div>
 
           {alert.recommendation && (
@@ -85,13 +91,13 @@ export default function AlertDrawer({ alert, onClose }) {
 
         <div className="pt-4 border-t border-border flex flex-col sm:flex-row gap-2">
           <button
-            onClick={() => setActionDone("Official Notice Issued to District Collector Nodal Agency.")}
+            onClick={() => { setStatus("Escalated"); setActionDone("Official notice issued to the district nodal agency."); }}
             className="flex-1 h-9 rounded bg-[#B23A32] hover:bg-[#8D2B24] text-white text-[12.5px] font-bold transition-colors flex items-center justify-center gap-1.5"
           >
             <ShieldAlert size={14} /> Issue DM Inquiry
           </button>
           <button
-            onClick={() => setActionDone("Alert marked as reviewed and logged in MoSPI Audit Journal.")}
+            onClick={() => { setStatus("Closed"); setActionDone("Alert marked as reviewed."); }}
             className="flex-1 h-9 rounded border border-border text-ink text-[12.5px] font-semibold hover:bg-paper transition-colors"
           >
             Mark Reviewed

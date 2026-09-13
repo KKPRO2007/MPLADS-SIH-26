@@ -1,10 +1,10 @@
 export default function RiskPill({ score }) {
   const tone =
     score >= 80
-      ? { bg: "#FBE4E1", fg: "#A32A20" }
+      ? { bg: "#DDF3E2", fg: "#176B35" }
       : score >= 60
-      ? { bg: "#FDF0D9", fg: "#8A5F17" }
-      : { bg: "#E1F0E5", fg: "#1F6B37" };
+      ? { bg: "#E7F6EA", fg: "#237A3B" }
+      : { bg: "#F0FAF2", fg: "#39834D" };
 
   return (
     <span

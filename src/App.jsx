@@ -25,7 +25,9 @@ export default function App() {
       return null;
     }
   });
-  const [showLogin, setShowLogin] = useState(() => !localStorage.getItem("mplads_token"));
+  // The monitoring portal is publicly viewable. Signing in is only needed for
+  // authenticated workspace features.
+  const [showLogin, setShowLogin] = useState(false);
 
   const handleLogin = ({ access_token: token, user: signedInUser }) => {
     localStorage.setItem("mplads_token", token);
@@ -45,15 +47,13 @@ export default function App() {
   useEffect(() => {
     const controller = new AbortController();
     const token = localStorage.getItem("mplads_token");
-    if (!token) {
-      setBackendData(null);
-      return () => controller.abort();
-    }
-    fetch("/api/ui-data", { signal: controller.signal, headers: { Authorization: `Bearer ${token}` } })
+    fetch("/api/ui-data", {
+      signal: controller.signal,
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
       .then((response) => {
         if (response.status === 401) {
           handleLogout();
-          setShowLogin(true);
         }
         if (!response.ok) throw new Error("Backend unavailable");
         return response.json();
@@ -104,7 +104,7 @@ export default function App() {
           <HomePage onNavigate={setPage} token={localStorage.getItem("mplads_token")} />
         ) : (
           <main id="main-content" className="flex-1 overflow-y-auto p-4 sm:p-6 max-w-[1500px] w-full mx-auto">
-            {page === "workspace" && <RoleWorkspacePage user={user} onNavigate={setPage} />}
+            {page === "workspace" && <RoleWorkspacePage user={user} data={backendData} onNavigate={setPage} />}
             {page === "overview" && (
               <OverviewPage
                 goToAlerts={() => setPage("risk")}
@@ -113,10 +113,10 @@ export default function App() {
                 error={backendError}
               />
             )}
-            {page === "risk" && <RiskMonitoringPage defaultTab="alerts" data={backendData} error={backendError} />}
-            {page === "alerts" && <RiskMonitoringPage defaultTab="alerts" data={backendData} error={backendError} />}
-            {page === "mps" && <RiskMonitoringPage defaultTab="mps" data={backendData} error={backendError} />}
-            {page === "works" && <RiskMonitoringPage defaultTab="works" data={backendData} error={backendError} />}
+            {page === "risk" && <RiskMonitoringPage defaultTab="alerts" data={backendData} error={backendError} user={user} onLogin={() => setShowLogin(true)} />}
+            {page === "alerts" && <RiskMonitoringPage defaultTab="alerts" data={backendData} error={backendError} user={user} onLogin={() => setShowLogin(true)} />}
+            {page === "mps" && <RiskMonitoringPage defaultTab="mps" data={backendData} error={backendError} user={user} onLogin={() => setShowLogin(true)} />}
+            {page === "works" && <RiskMonitoringPage defaultTab="works" data={backendData} error={backendError} user={user} onLogin={() => setShowLogin(true)} />}
             {page === "states" && <StateExplorerPage />}
             {page === "sectors" && <SectorAnalyticsPage />}
             {page === "funds" && <FundFlowPage />}

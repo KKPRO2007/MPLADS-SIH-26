@@ -1,10 +1,11 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from app.auth import create_access_token, hash_password, verify_password
 from app.core.config import get_settings
 from app.data_service import model_status, risks, summary
+from app.ml_service import predict_project, warm_models
 
 settings = get_settings()
 app = FastAPI(title=settings.app_name, version="0.1.0")
@@ -15,6 +16,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.on_event("startup")
+def load_ml_models() -> None:
+    warm_models()
 
 _demo_password_hash = hash_password("change-me")
 
@@ -49,6 +55,15 @@ def get_risks(limit: int = 12, state: str | None = None, risk: str | None = None
 @app.get("/api/ml/status")
 def get_model_status() -> dict:
     return model_status()
+
+
+@app.get("/predict/{project_id}")
+@app.get("/projects/{project_id}/risk")
+def predict(project_id: str) -> dict:
+    try:
+        return predict_project(project_id)
+    except KeyError as error:
+        raise HTTPException(status_code=404, detail=f"Project {project_id} was not found") from error
 
 
 @app.post("/auth/login")

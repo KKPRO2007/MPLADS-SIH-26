@@ -1,4 +1,5 @@
-import { ClipboardCheck, FilePlus2, Mail, ShieldCheck, TrendingUp, Users } from "lucide-react";
+import { AlertTriangle, ClipboardCheck, Clock3, FilePlus2, Mail, ShieldCheck, TrendingUp, Users } from "lucide-react";
+import MinistryShowcase from "../components/MinistryShowcase.jsx";
 
 const ROLE_WORKSPACES = {
   mp: {
@@ -45,9 +46,11 @@ const ROLE_WORKSPACES = {
   },
 };
 
-export default function RoleWorkspacePage({ user, onNavigate }) {
+export default function RoleWorkspacePage({ user, data, onNavigate }) {
   const workspace = ROLE_WORKSPACES[user?.role] || ROLE_WORKSPACES.mp;
   const Icon = workspace.icon;
+  const alerts = (data?.alerts || []).slice(0, 3);
+  const delayedWorks = (data?.worksNeedingAttention || []).slice(0, 3);
 
   return (
     <div className="flex flex-col gap-5">
@@ -71,9 +74,26 @@ export default function RoleWorkspacePage({ user, onNavigate }) {
         ))}
       </section>
 
+      {user?.role === "ministry" && <MinistryShowcase data={data} />}
+
       <section className="bg-card border border-border rounded-[6px] p-5 shadow-xs">
         <div className="flex items-center gap-2 mb-3"><Mail size={17} className="text-navy" /><h2 className="font-serif font-bold text-base text-ink">Follow-up notifications</h2></div>
-        <p className="text-[12px] text-muted">Review reminders and missing-update notifications will be addressed to the assigned role email after notification delivery is configured.</p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <div className="border border-border bg-paper p-3">
+            <div className="flex items-center gap-2 text-[12px] font-bold text-ink"><AlertTriangle size={15} className="text-[#B23A32]" /> High-priority MP reviews</div>
+            <div className="flex flex-col divide-y divide-border mt-2">
+              {alerts.map((alert) => <div key={alert.id} className="py-2 text-[11.5px] text-subtle"><div className="font-semibold text-ink truncate">{alert.work}</div><div className="mt-0.5">MP: {alert.mp || "Not recorded"} · {alert.state || "State not recorded"} · Risk {alert.risk}</div><div className="text-[#A32A20] mt-0.5">{alert.why || alert.type || "Risk review required"}</div></div>)}
+              {alerts.length === 0 && <div className="py-2 text-[11.5px] text-muted">No high-priority MP review reminders.</div>}
+            </div>
+          </div>
+          <div className="border border-border bg-paper p-3">
+            <div className="flex items-center gap-2 text-[12px] font-bold text-ink"><Clock3 size={15} className="text-accent" /> Missing or delayed updates</div>
+            <div className="flex flex-col divide-y divide-border mt-2">
+              {delayedWorks.map((work) => <div key={work.name} className="py-2 text-[11.5px] text-subtle"><div className="font-semibold text-ink truncate">{work.name}</div><div className="mt-0.5">{work.state || "State not recorded"} · {work.days} days overdue</div><div className="text-accent mt-0.5">{work.reason || "Progress update required"}</div></div>)}
+              {delayedWorks.length === 0 && <div className="py-2 text-[11.5px] text-muted">No delayed or missing-update items.</div>}
+            </div>
+          </div>
+        </div>
       </section>
     </div>
   );

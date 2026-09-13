@@ -8,6 +8,10 @@ export default defineConfig({
     proxy: {
       "/api": "http://localhost:8080",
       "/health": "http://localhost:8080",
+      "/ml-api": {
+        target: "http://localhost:8001",
+        rewrite: (path) => path.replace(/^\/ml-api/, ""),
+      },
     },
   },
 });

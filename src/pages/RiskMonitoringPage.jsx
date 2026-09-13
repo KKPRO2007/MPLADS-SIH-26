@@ -23,7 +23,10 @@ const ALERT_RISK_FILTERS = [
   { key: "low", label: "Low Risk" },
 ];
 
-export default function RiskMonitoringPage({ defaultTab = "works", data, error }) {
+const displayRiskScore = (work) => Math.min(96, Math.max(20, Number(work.riskScore ?? work.risk ?? 20)));
+const displayRiskLevel = (work) => work.riskLevel || (displayRiskScore(work) >= 70 ? "High" : displayRiskScore(work) >= 40 ? "Medium" : "Low");
+
+export default function RiskMonitoringPage({ defaultTab = "works", data, error, user, onLogin }) {
   const [activeTab, setActiveTab] = useState(defaultTab);
   const alerts = data?.alerts || [];
   const mpDirectory = data?.mps || [];
@@ -88,7 +91,7 @@ export default function RiskMonitoringPage({ defaultTab = "works", data, error }
   const totalAssets = useMemo(() => statusStages.reduce((s, x) => s + x.value, 0), [statusStages]);
 
   const filteredWorks = useMemo(() => {
-    return worksList.filter((w) => {
+    return [...worksList].sort((left, right) => Number(right.riskScore || 0) - Number(left.riskScore || 0) || String(left.id).localeCompare(String(right.id))).filter((w) => {
       const matchStatus = workStatusFilter === "All" || w.status === workStatusFilter;
       const matchSector = workSectorFilter === "All" || w.sector.includes(workSectorFilter);
       const matchQuery =
@@ -219,7 +222,7 @@ export default function RiskMonitoringPage({ defaultTab = "works", data, error }
                       {a.amount}
                     </td>
                     <td className="px-4 py-3">
-                      <RiskPill score={a.risk} />
+                      <div className="flex items-center gap-2"><RiskPill score={a.risk} /><span className="text-[11px] font-semibold text-subtle">{a.riskLevel || (a.risk >= 80 ? "High" : a.risk >= 60 ? "Medium" : "Low")}</span></div>
                     </td>
                     <td className="px-4 py-3">
                       <StatusTag status={a.status} />
@@ -495,7 +498,7 @@ export default function RiskMonitoringPage({ defaultTab = "works", data, error }
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
             <SectionCard title="National Asset Execution Status" className="lg:col-span-2">
-              <div style={{ width: "100%", height: 180 }}>
+              <div style={{ width: "100%", height: 240 }}>
                 <ResponsiveContainer>
                   <PieChart>
                     <Pie
@@ -530,7 +533,7 @@ export default function RiskMonitoringPage({ defaultTab = "works", data, error }
             </SectionCard>
 
             <SectionCard title="High-Delay Works Requesting DM Action" className="lg:col-span-3">
-              <div className="flex flex-col divide-y divide-border">
+              <div className="flex flex-col divide-y divide-border max-h-[500px] overflow-y-auto pr-1">
                 {worksNeedingAttention.map((w) => (
                   <div key={w.name} className="flex items-center gap-3 py-2.5">
                     <Clock size={16} className="text-accent shrink-0" strokeWidth={2} />
@@ -591,6 +594,9 @@ export default function RiskMonitoringPage({ defaultTab = "works", data, error }
                     <th className="px-4 py-3">Executing Agency</th>
                     <th className="px-4 py-3">Cost</th>
                     <th className="px-4 py-3">Physical Progress</th>
+                    <th className="px-4 py-3">Risk Score</th>
+                    <th className="px-4 py-3">Risk Level</th>
+                    <th className="px-4 py-3">Anomaly Type</th>
                     <th className="px-4 py-3">Status</th>
                     <th className="px-4 py-3 text-right">Details</th>
                   </tr>
@@ -643,6 +649,9 @@ export default function RiskMonitoringPage({ defaultTab = "works", data, error }
                           </span>
                         </div>
                       </td>
+                      <td className="px-4 py-3"><RiskPill score={displayRiskScore(w)} /></td>
+                      <td className="px-4 py-3"><span className="text-[12px] font-semibold text-subtle">{displayRiskLevel(w)}</span></td>
+                      <td className="px-4 py-3 text-[12px] text-subtle">{w.flagType || "Not classified"}</td>
                       <td className="px-4 py-3">
                         <StatusTag
                           status={
@@ -669,6 +678,8 @@ export default function RiskMonitoringPage({ defaultTab = "works", data, error }
           <WorkDetailsModal
             work={selectedWork}
             onClose={() => setSelectedWork(null)}
+            user={user}
+            onLogin={onLogin}
           />
         </div>
       )}
